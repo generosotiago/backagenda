@@ -1,11 +1,11 @@
-const User = require("../user");
+const User = require("../models/user");
 const bcrypt = require("bcrypt");
 
 exports.register = async (req, res, next) => {
-  const { username, password } = req.body;
+  const { email, password, name, phone  } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ message: "Nome e senha obrigatorios." });
+  if (!email || !password) {
+    return res.status(400).json({ message: "email e senha obrigatorios." });
   }
 
   if (password.length < 4) {
@@ -13,21 +13,26 @@ exports.register = async (req, res, next) => {
       .status(400)
       .json({ message: "Senha deve ter pelo menos 4 caracteres" });
   }
+  if (!name || !phone) {
+    return res.status(400).json({ message: "Todos os campos são obrigatórios" });
+  }
 
   try {
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "Usuário já existe" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
-      username,
+      email,
       password: hashedPassword,
+      name,
+      phone,
     });
 
     res.status(201).json({
       message: "Usuário criado com sucesso!",
-      user: { id: newUser._id, username: newUser.username },
+      user: { id: newUser._id, email: newUser.email, name: newUser.name },
     });
   } catch (err) {
     console.error("Erro ao criar usuário:", err);
@@ -39,16 +44,16 @@ exports.register = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
   
-    if (!username || !password) {
+    if (!email || !password) {
       return res.status(400).json({
         message: "Nome de usuário ou senha não fornecidos.",
       });
     }
   
     try {
-      const user = await User.findOne({ username });
+      const user = await User.findOne({ email });
       if (!user) {
         return res.status(401).json({
           message: "Erro ao realizar login",
@@ -68,7 +73,7 @@ exports.login = async (req, res, next) => {
         message: "Login com sucesso",
         user: {
           id: user._id,
-          username: user.username,
+          email: user.email,
           isAdmin: user.isAdmin,
         },
       });
@@ -82,10 +87,10 @@ exports.login = async (req, res, next) => {
   };
   
 exports.deleteUser = async (req, res, next) => {
-  const { username } = req.body;
+  const { email } = req.body;
 
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ message: "Usuário não encontrado" });
@@ -93,7 +98,7 @@ exports.deleteUser = async (req, res, next) => {
     await user.remove();
     res.status(200).json({
       message: "Usuário deletado com sucesso",
-      user: { id: user._id, username: user.username },
+      user: { id: user._id, email: user.email },
     });
   } catch (error) {
     console.error("Erro ao deletar usuário:", error);
