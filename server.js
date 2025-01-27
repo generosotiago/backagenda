@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const app = express();
 const port = 8080;
+require('dotenv').config();
+
 
 const uri = "mongodb+srv://admin:admin@cluster0.a8iwr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 

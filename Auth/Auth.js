@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const { generateToken } = require('../utils/jwtUtils')
 
 exports.register = async (req, res, next) => {
   const { email, password, name, phone  } = req.body;
@@ -69,8 +70,11 @@ exports.login = async (req, res, next) => {
         });
       }
   
+      const token = generateToken(user._id, user.isAdmin);
+      
       res.status(200).json({
         message: "Login com sucesso",
+        token,
         user: {
           id: user._id,
           email: user.email,
