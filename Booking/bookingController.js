@@ -1,4 +1,5 @@
 const Booking = require('../models/booking');
+const authenticateJWT = require('../middleware/authMiddleware'); 
 
 const createBooking = async (req, res) => {
   const booking = req.body;
@@ -15,14 +16,13 @@ const createBooking = async (req, res) => {
   const endTime = new Date(`${formattedDate}T${booking.endTime}:00`);
 
   if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
-    return res.status(400).json({ message: 'data e horario devem ser validos' });
+    return res.status(400).json({ message: 'Start time e end time devem ser datas válidas.' });
   }
 
   booking.startTime = startTime;
   booking.endTime = endTime;
 
   try {
-    // Verificar conflito de horários
     const conflict = await Booking.findOne({
       room: booking.room,
       date: booking.date,
@@ -36,7 +36,6 @@ const createBooking = async (req, res) => {
       return res.status(409).json({ message: 'Conflito de horários para essa sala.' });
     }
 
-    // Salvar a nova reserva
     await new Booking(booking).save();
     res.status(201).json({ message: 'Reserva criada com sucesso!' });
   } catch (err) {
@@ -55,4 +54,4 @@ const getBookings = async (req, res) => {
   }
 };
 
-module.exports = { createBooking, getBookings };
+module.exports = { createBooking: [authenticateJWT, createBooking], getBookings };
