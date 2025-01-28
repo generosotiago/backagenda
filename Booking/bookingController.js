@@ -3,7 +3,26 @@ const Booking = require('../models/booking');
 const createBooking = async (req, res) => {
   const booking = req.body;
 
+  if (!booking.description || !booking.room || !booking.date || !booking.startTime || !booking.endTime) {
+    return res.status(400).json({ message: 'Todos os campos (description, room, date, startTime, endTime) são obrigatórios.' });
+  }
+
+  const [day, month, year] = booking.date.split('/');
+  const formattedDate = `${year}-${month}-${day}`;
+  booking.date = formattedDate;
+
+  const startTime = new Date(`${formattedDate}T${booking.startTime}:00`);
+  const endTime = new Date(`${formattedDate}T${booking.endTime}:00`);
+
+  if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+    return res.status(400).json({ message: 'data e horario devem ser validos' });
+  }
+
+  booking.startTime = startTime;
+  booking.endTime = endTime;
+
   try {
+    // Verificar conflito de horários
     const conflict = await Booking.findOne({
       room: booking.room,
       date: booking.date,
@@ -17,6 +36,7 @@ const createBooking = async (req, res) => {
       return res.status(409).json({ message: 'Conflito de horários para essa sala.' });
     }
 
+    // Salvar a nova reserva
     await new Booking(booking).save();
     res.status(201).json({ message: 'Reserva criada com sucesso!' });
   } catch (err) {
