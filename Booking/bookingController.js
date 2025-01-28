@@ -5,10 +5,8 @@ const createBooking = async (req, res) => {
   if (!req.userId) {
     return res.status(400).json({ message: 'Usuário não autenticado' });
   }
-
   const booking = req.body;
   booking.user = req.userId; 
-
   if (
     !booking.description ||
     !booking.room ||

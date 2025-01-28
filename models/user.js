@@ -5,11 +5,13 @@ const UserSchema = new mongoose.Schema({
         type: String,
         unique: true,
         required: true,
+        select: false
     },
     password: {
         type: String,
         minlength: 4,
         required: true,
+        select: false
     },
     name: {
         type: String,
@@ -23,10 +25,12 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: "Basic",
         required: true,
+        select: false
     },
     isAdmin: {
         type: Boolean,
         default: false, 
+        select: false
     },
 });
 
