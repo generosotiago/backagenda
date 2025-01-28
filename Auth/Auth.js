@@ -92,25 +92,31 @@ exports.login = async (req, res, next) => {
     }
   };
   
-exports.deleteUser = async (req, res, next) => {
-  const { email } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({ message: "Usuário não encontrado" });
+  exports.deleteUser = async (req, res, next) => {
+    const { id } = req.body; 
+    if (!id) {
+      return res.status(400).json({ message: "ID do usuário não fornecido" });
     }
-    await user.remove();
-    res.status(200).json({
-      message: "Usuário deletado com sucesso",
-      user: { id: user._id, email: user.email },
-    });
-  } catch (error) {
-    console.error("Erro ao deletar usuário:", error);
-    res.status(500).json({
-      message: "Erro ao deletar usuário",
-      error: error.message,
-    });
-  }
-};
+  
+    try {
+      const user = await User.findById(id);
+  
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      await user.remove();
+  
+      res.status(200).json({
+        message: "Usuário deletado com sucesso",
+        user: { id: user._id, email: user.email },
+      });
+    } catch (error) {
+      console.error("Erro ao deletar usuário:", error);
+      res.status(500).json({
+        message: "Erro ao deletar usuário",
+        error: error.message,
+      });
+    }
+  };
+  
