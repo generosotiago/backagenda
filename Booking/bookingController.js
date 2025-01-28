@@ -1,14 +1,30 @@
-const Booking = require('../models/booking');
-const authenticateJWT = require('../middleware/authMiddleware'); 
+const Booking = require("../models/booking");
+const authenticateJWT = require("../middleware/authMiddleware");
 
 const createBooking = async (req, res) => {
-  const booking = req.body;
-
-  if (!booking.description || !booking.room || !booking.date || !booking.startTime || !booking.endTime) {
-    return res.status(400).json({ message: 'Todos os campos (description, room, date, startTime, endTime) são obrigatórios.' });
+  if (!req.userId) {
+    return res.status(400).json({ message: 'Usuário não autenticado' });
   }
 
-  const [day, month, year] = booking.date.split('/');
+  const booking = req.body;
+  booking.user = req.userId; 
+
+  if (
+    !booking.description ||
+    !booking.room ||
+    !booking.date ||
+    !booking.startTime ||
+    !booking.endTime
+  ) {
+    return res
+      .status(400)
+      .json({
+        message:
+          "Todos os campos (description, room, date, startTime, endTime) são obrigatórios.",
+      });
+  }
+
+  const [day, month, year] = booking.date.split("/");
   const formattedDate = `${year}-${month}-${day}`;
   booking.date = formattedDate;
 
@@ -16,7 +32,9 @@ const createBooking = async (req, res) => {
   const endTime = new Date(`${formattedDate}T${booking.endTime}:00`);
 
   if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
-    return res.status(400).json({ message: 'Start time e end time devem ser datas válidas.' });
+    return res
+      .status(400)
+      .json({ message: "Start time e end time devem ser datas válidas." });
   }
 
   booking.startTime = startTime;
@@ -33,25 +51,35 @@ const createBooking = async (req, res) => {
     });
 
     if (conflict) {
-      return res.status(409).json({ message: 'Conflito de horários para essa sala.' });
+      return res
+        .status(409)
+        .json({ message: "Conflito de horários para essa sala." });
     }
 
+    
+    booking.user = req.userId; 
+
     await new Booking(booking).save();
-    res.status(201).json({ message: 'Reserva criada com sucesso!' });
+    res.status(201).json({ message: "Reserva criada com sucesso!" });
   } catch (err) {
-    console.error('Erro ao salvar reserva:', err);
-    res.status(500).json({ message: 'Erro ao salvar reserva.' });
+    console.error("Erro ao salvar reserva:", err);
+    res.status(500).json({ message: "Erro ao salvar reserva." });
   }
 };
 
 const getBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({});
-    res.status(200).json(bookings);
+    const bookings = await Booking.find({}).populate('user');  
+
+    res.status(200).json(bookings); 
   } catch (err) {
     console.error('Erro ao buscar agendamentos:', err);
     res.status(500).json({ message: 'Erro ao buscar agendamentos' });
   }
 };
 
-module.exports = { createBooking: [authenticateJWT, createBooking], getBookings };
+
+module.exports = {
+  createBooking: [authenticateJWT, createBooking],
+  getBookings,
+};

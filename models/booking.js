@@ -5,7 +5,12 @@ const bookingSchema = new mongoose.Schema({
   room: String,
   date: String,
   startTime: Date,
-  endTime: Date
+  endTime: Date,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',  
+    required: true,
+  },
 });
 
 const Booking = mongoose.model('Booking', bookingSchema);

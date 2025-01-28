@@ -70,7 +70,7 @@ exports.login = async (req, res, next) => {
         });
       }
   
-      const token = generateToken(user._id, user.isAdmin);
+      const token = generateToken(user._id, user.isAdmin, user.phone, user.name);
       
       res.status(200).json({
         message: "Login com sucesso",
@@ -79,6 +79,8 @@ exports.login = async (req, res, next) => {
           id: user._id,
           email: user.email,
           isAdmin: user.isAdmin,
+          phone: user.phone,
+          name: user.name
         },
       });
     } catch (err) {
