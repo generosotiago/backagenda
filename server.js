@@ -27,6 +27,7 @@ app.use(cors());
 app.use('/bookings', require('./Booking/bookingRoute'));
 app.use("/api/auth", require("./Auth/Route"));
 app.use('/rooms', require('./Rooms/roomRoute'))
+app.use('/users', require('./users/userRoutes'));
 
 const User = require("./models/user");
 
