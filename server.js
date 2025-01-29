@@ -7,7 +7,7 @@ const port = 8080;
 require('dotenv').config();
 
 
-const uri = "mongodb+srv://admin:admin@cluster0.a8iwr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = process.env.MONGO_URI;
 
 mongoose.connect(uri, {
   useNewUrlParser: true,
@@ -26,6 +26,7 @@ app.use(cors());
 
 app.use('/bookings', require('./Booking/bookingRoute'));
 app.use("/api/auth", require("./Auth/Route"));
+app.use('/rooms', require('./Rooms/roomRoute'))
 
 const User = require("./models/user");
 

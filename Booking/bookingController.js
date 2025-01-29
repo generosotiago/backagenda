@@ -4,12 +4,11 @@ const authenticateJWT = require("../middleware/authMiddleware");
 
 const nodemailer = require('nodemailer');
 
-// Criação do transporte de e-mail (configuração do seu serviço de e-mail)
 const transporter = nodemailer.createTransport({
-  service: 'gmail',  // Ou o serviço de e-mail que você usar (pode ser Gmail, SendGrid, etc.)
+  service: 'gmail',  
   auth: {
-    user: 'tiagogeneroso47@gmail.com', // Seu e-mail
-    pass: 'lsgo ozlp zoaa afst', // Senha ou App Password (veja como gerar um App Password no Gmail, por exemplo)
+    user: 'tiagogeneroso47@gmail.com',
+    pass: 'lsgo ozlp zoaa afst', 
   },
 });
 
@@ -19,7 +18,7 @@ const createBooking = async (req, res) => {
   }
 
   const booking = req.body;
-  booking.user = req.userId;  // O usuário do agendamento será o usuário autenticado
+  booking.user = req.userId;  
 
   if (
     !booking.description ||
@@ -49,7 +48,7 @@ const createBooking = async (req, res) => {
   booking.endTime = endTime;
 
   try {
-    // Verificar se há conflito de horários
+
     const conflict = await Booking.findOne({
       room: booking.room,
       date: booking.date,
@@ -58,23 +57,15 @@ const createBooking = async (req, res) => {
         { endTime: { $gt: booking.startTime, $lte: booking.endTime } },
       ],
     });
-
     if (conflict) {
       return res.status(409).json({ message: "Conflito de horários para essa sala." });
     }
-
-    // Criar o agendamento
     const newBooking = await new Booking(booking).save();
-
-    // Popula o campo 'user' para trazer os dados do usuário, incluindo o e-mail
     const populatedBooking = await Booking.findById(newBooking._id).populate('user', 'email name');
     console.log("Usuário associado à reserva:", populatedBooking.user);
-
-
-    // Preparar o e-mail de confirmação
     const mailOptions = {
       from: 'vidanovaoficial@gmail.com',
-      to: populatedBooking.user.email,  // Usar o e-mail do usuário populado
+      to: populatedBooking.user.email, 
       subject: 'Reserva Confirmada',
       text: `Olá ${populatedBooking.user.name}, sua reserva foi confirmada:
       Sala: ${populatedBooking.room}
@@ -84,21 +75,13 @@ const createBooking = async (req, res) => {
       Fim: ${populatedBooking.endTime.toLocaleTimeString()}
       `,
     };
-
-    // Enviar o e-mail
     await transporter.sendMail(mailOptions);
-
     res.status(201).json({ message: "Reserva criada com sucesso!" });
   } catch (err) {
     console.error("Erro ao salvar reserva:", err);
     res.status(500).json({ message: "Erro ao salvar reserva." });
   }
 };
-
-
-
-
-
 
 const getBookings = async (req, res) => {
   try {
