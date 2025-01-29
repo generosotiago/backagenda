@@ -6,5 +6,7 @@ router.post('/', roomController.createRoom);
 router.get('/', roomController.getRooms);
 router.put('/:id', roomController.updateRoom);
 router.delete('/:id', roomController.deleteRoom);
+router.get('/:id', roomController.getRoomById);  // Rota para buscar sala por ID
+
 
 module.exports = router;

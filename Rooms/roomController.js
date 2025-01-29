@@ -61,3 +61,18 @@ exports.deleteRoom = async (req, res) => {
         res.status(500).json({ error: 'Erro ao deletar a sala' });
     }
 };
+
+exports.getRoomById = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const room = await Room.findById(id);  id
+        if (!room) {
+            return res.status(404).json({ error: 'Sala não encontrada' });
+        }
+        res.json(room); 
+    } catch (err) {
+        console.error('Erro ao buscar sala:', err);
+        res.status(500).json({ message: 'Erro ao buscar sala' });
+    }
+};
+
