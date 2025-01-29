@@ -10,13 +10,14 @@ const showUser = async (req, res) => {
 
   try {
     const userQuery = User.findById(id);
+    
     if (req.isAdmin || loggedInUserId === id) {
-      const user = await userQuery.select('+password'); 
+      const user = await userQuery.select('+password +email'); 
+
       if (!user) {
         return res.status(404).json({ message: 'Usuário não encontrado.' });
       }
 
-      
       const userData = {
         name: user.name,
         email: user.email,
@@ -26,7 +27,8 @@ const showUser = async (req, res) => {
 
       return res.status(200).json(userData);
     } else {
-      const user = await userQuery.select("-password");
+      const user = await userQuery.select("-password", "+email"); 
+
       if (!user) {
         return res.status(404).json({ message: 'Usuário não encontrado.' });
       }
