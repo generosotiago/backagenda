@@ -70,7 +70,7 @@ exports.login = async (req, res, next) => {
         });
       }
   
-      const token = generateToken(user._id, user.isAdmin, user.phone, user.name);
+      const token = generateToken(user._id, user.isAdmin, user.phone, user.name, user.email);
       
       res.status(200).json({
         message: "Login com sucesso",
@@ -121,37 +121,32 @@ exports.login = async (req, res, next) => {
   };
   
 
-const mongoose = require('mongoose');  // Verificar a importação do mongoose
+const mongoose = require('mongoose');  
 
 exports.editUser = async (req, res) => {
-  const { id } = req.body;  // O ID do usuário vem no corpo da requisição
-  const { name, phone, email } = req.body;  // Dados a serem atualizados
+  const { id } = req.body;  
+  const { name, phone, email } = req.body;  
   
-  // Verificar se todos os campos obrigatórios estão presentes
   if (!id || !name || !phone || !email) {
     return res.status(400).json({ message: 'Todos os campos (id, name, phone, email) são obrigatórios.' });
   }
 
-  // Verificar se o ID fornecido é válido
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: 'ID inválido.' });
   }
 
   try {
-    // Buscar o usuário pelo ID
     const user = await User.findById(id);
 
-    // Verificar se o usuário existe
     if (!user) {
       return res.status(404).json({ message: 'Usuário não encontrado.' });
     }
 
-    // Atualizar os dados do usuário
     user.name = name;
     user.phone = phone;
     user.email = email;
 
-    // Salvar as mudanças no banco de dados
+
     await user.save();
 
     res.status(200).json({

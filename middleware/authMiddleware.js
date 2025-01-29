@@ -1,7 +1,7 @@
 const { verifyToken } = require('../utils/jwtUtils');
 
 const authMiddleware = (req, res, next) => {
-    const token = req.headers.authorization && req.headers.authorization.split(' ')[1]; // Pega o token do cabeçalho Authorization
+    const token = req.headers.authorization && req.headers.authorization.split(' ')[1]; 
     console.log('Token recebido:', token); 
 
     if (!token) {
@@ -18,6 +18,7 @@ const authMiddleware = (req, res, next) => {
         req.isAdmin = decoded.isAdmin;
         req.name = decoded.name;    
         req.phone = decoded.phone;  
+        req.email = decoded.email;  
 
         next(); 
     } catch (err) {
