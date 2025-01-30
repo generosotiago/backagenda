@@ -28,6 +28,7 @@ app.use('/bookings', require('./Booking/bookingRoute'));
 app.use("/api/auth", require("./Auth/Route"));
 app.use('/rooms', require('./Rooms/roomRoute'))
 app.use('/users', require('./users/userRoutes'));
+app.use('/stats', require('./stats/statsRoute'));
 
 const User = require("./models/user");
 

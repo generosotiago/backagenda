@@ -1,10 +1,19 @@
-const { verifyToken } = require('../utils/jwtUtils');
+const jwt = require('jsonwebtoken');
+
+const verifyToken = (token) => {
+  try {
+    return jwt.verify(token, 'VidaNova2025');
+  } catch (err) {
+    throw new Error('Token inválido ou expirado');
+  }
+};
 
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
   if (!token) {
     return res.status(401).json({ message: "Token não fornecido." });
   }
+
   try {
     const decoded = verifyToken(token); 
     if (!decoded) {
