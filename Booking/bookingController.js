@@ -48,18 +48,22 @@ const createBooking = async (req, res) => {
   booking.endTime = endTime;
 
   try {
-
     const conflict = await Booking.findOne({
       room: booking.room,
       date: booking.date,
       $or: [
-        { startTime: { $lt: booking.endTime, $gte: booking.startTime } },
+        { startTime: { $lt: booking.endTime, $gt: booking.startTime } },
+        { endTime: { $gt: booking.startTime, $lt: booking.endTime } },
+        { startTime: { $lte: booking.startTime }, endTime: { $gte: booking.endTime } },
+        { startTime: { $gte: booking.startTime, $lt: booking.endTime } },
         { endTime: { $gt: booking.startTime, $lte: booking.endTime } },
       ],
     });
+
     if (conflict) {
       return res.status(409).json({ message: "Conflito de horários para essa sala." });
     }
+
     const newBooking = await new Booking(booking).save();
     const populatedBooking = await Booking.findById(newBooking._id).populate('user', 'email name');
     console.log("Usuário associado à reserva:", populatedBooking.user);
@@ -82,6 +86,7 @@ const createBooking = async (req, res) => {
     res.status(500).json({ message: "Erro ao salvar reserva." });
   }
 };
+
 
 const getBookings = async (req, res) => {
   try {
