@@ -16,16 +16,15 @@ const getStats = async (req, res) => {
     lastWeek.setDate(lastWeek.getDate() - 7);
 
     const weeklyBookingsCount = await Booking.countDocuments({
-      date: { $gte: lastWeek }
+      date: { $gte: lastWeek },
     });
 
     res.status(200).json({
       rooms: roomsCount,
       bookings: bookingsCount,
       users: usersCount,
-      week: weeklyBookingsCount
+      week: weeklyBookingsCount,
     });
-
   } catch (error) {
     console.error("Erro ao buscar estatísticas:", error);
     res.status(500).json({ message: "Erro ao obter estatísticas." });

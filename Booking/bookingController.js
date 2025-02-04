@@ -1,24 +1,24 @@
 const Booking = require("../models/booking");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const authenticateJWT = require("../middleware/authMiddleware");
 
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',  
+  service: "gmail",
   auth: {
-    user: 'tiagogeneroso47@gmail.com',
-    pass: 'lsgo ozlp zoaa afst', 
+    user: "tiagogeneroso47@gmail.com",
+    pass: "lsgo ozlp zoaa afst",
   },
 });
 
 const createBooking = async (req, res) => {
   if (!req.userId) {
-    return res.status(400).json({ message: 'Usuário não autenticado' });
+    return res.status(400).json({ message: "Usuário não autenticado" });
   }
 
   const booking = req.body;
-  booking.user = req.userId;  
+  booking.user = req.userId;
 
   if (
     !booking.description ||
@@ -33,7 +33,7 @@ const createBooking = async (req, res) => {
     });
   }
 
-  const [day, month, year] = booking.date.split("/"); 
+  const [day, month, year] = booking.date.split("/");
   const formattedDate = `${year}-${month}-${day}`;
   booking.date = formattedDate;
 
@@ -41,7 +41,9 @@ const createBooking = async (req, res) => {
   const endTime = new Date(`${formattedDate}T${booking.endTime}:00`);
 
   if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
-    return res.status(400).json({ message: "Start time e end time devem ser datas válidas." });
+    return res
+      .status(400)
+      .json({ message: "Start time e end time devem ser datas válidas." });
   }
 
   booking.startTime = startTime;
@@ -54,23 +56,31 @@ const createBooking = async (req, res) => {
       $or: [
         { startTime: { $lt: booking.endTime, $gt: booking.startTime } },
         { endTime: { $gt: booking.startTime, $lt: booking.endTime } },
-        { startTime: { $lte: booking.startTime }, endTime: { $gte: booking.endTime } },
+        {
+          startTime: { $lte: booking.startTime },
+          endTime: { $gte: booking.endTime },
+        },
         { startTime: { $gte: booking.startTime, $lt: booking.endTime } },
         { endTime: { $gt: booking.startTime, $lte: booking.endTime } },
       ],
     });
 
     if (conflict) {
-      return res.status(409).json({ message: "Conflito de horários para essa sala." });
+      return res
+        .status(409)
+        .json({ message: "Conflito de horários para essa sala." });
     }
 
     const newBooking = await new Booking(booking).save();
-    const populatedBooking = await Booking.findById(newBooking._id).populate('user', 'email name');
+    const populatedBooking = await Booking.findById(newBooking._id).populate(
+      "user",
+      "email name"
+    );
     console.log("Usuário associado à reserva:", populatedBooking.user);
     const mailOptions = {
-      from: 'vidanovaoficial@gmail.com',
-      to: populatedBooking.user.email, 
-      subject: 'Reserva Confirmada',
+      from: "vidanovaoficial@gmail.com",
+      to: populatedBooking.user.email,
+      subject: "Reserva Confirmada",
       text: `Olá ${populatedBooking.user.name}, sua reserva foi confirmada:
       Sala: ${populatedBooking.room}
       Descrição: ${populatedBooking.description}
@@ -87,19 +97,18 @@ const createBooking = async (req, res) => {
   }
 };
 
-
 const getBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({}).populate('user');  
-    res.status(200).json(bookings); 
+    const bookings = await Booking.find({}).populate("user");
+    res.status(200).json(bookings);
   } catch (err) {
-    console.error('Erro ao buscar agendamentos:', err);
-    res.status(500).json({ message: 'Erro ao buscar agendamentos' });
+    console.error("Erro ao buscar agendamentos:", err);
+    res.status(500).json({ message: "Erro ao buscar agendamentos" });
   }
 };
 
 const deleteBooking = async (req, res) => {
-  const { id } = req.params; 
+  const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: "ID inválido" });
@@ -127,8 +136,8 @@ const deleteBooking = async (req, res) => {
 };
 
 const editBooking = async (req, res) => {
-  const { id } = req.params;  
-  const updatedData = req.body; 
+  const { id } = req.params;
+  const updatedData = req.body;
 
   if (
     !updatedData.description ||
@@ -138,8 +147,7 @@ const editBooking = async (req, res) => {
     !updatedData.endTime
   ) {
     return res.status(400).json({
-      message:
-        "Todos os campos são obrigatórios.",
+      message: "Todos os campos são obrigatórios.",
     });
   }
 
@@ -151,7 +159,9 @@ const editBooking = async (req, res) => {
   const endTime = new Date(`${formattedDate}T${updatedData.endTime}:00`);
 
   if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
-    return res.status(400).json({ message: "Start time e end time devem ser datas válidas." });
+    return res
+      .status(400)
+      .json({ message: "Start time e end time devem ser datas válidas." });
   }
 
   updatedData.startTime = startTime;
@@ -168,13 +178,17 @@ const editBooking = async (req, res) => {
       room: updatedData.room,
       date: updatedData.date,
       $or: [
-        { startTime: { $lt: updatedData.endTime, $gte: updatedData.startTime } },
+        {
+          startTime: { $lt: updatedData.endTime, $gte: updatedData.startTime },
+        },
         { endTime: { $gt: updatedData.startTime, $lte: updatedData.endTime } },
       ],
     });
 
     if (conflict) {
-      return res.status(409).json({ message: "Conflito de horários para essa sala." });
+      return res
+        .status(409)
+        .json({ message: "Conflito de horários para essa sala." });
     }
 
     await Booking.findByIdAndUpdate(id, updatedData, { new: true });
@@ -193,5 +207,5 @@ module.exports = {
   createBooking: [authenticateJWT, createBooking],
   getBookings,
   deleteBooking,
-  editBooking
+  editBooking,
 };
