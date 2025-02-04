@@ -135,11 +135,9 @@ const editUser = async (req, res) => {
   const { name, phone, email } = req.body;
 
   if (!id || !name || !phone || !email) {
-    return res
-      .status(400)
-      .json({
-        message: "Todos os campos (id, name, phone, email) são obrigatórios.",
-      });
+    return res.status(400).json({
+      message: "Todos os campos (id, name, phone, email) são obrigatórios.",
+    });
   }
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -174,4 +172,4 @@ const editUser = async (req, res) => {
   }
 };
 
-module.exports = {register, login, deleteUser, editUser}
+module.exports = { register, login, deleteUser, editUser };

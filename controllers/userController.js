@@ -5,9 +5,7 @@ const showUser = async (req, res) => {
   const loggedInUserId = req.userId;
 
   if (loggedInUserId !== id && !req.isAdmin) {
-    return res
-      .status(403)
-      .json({ message: "sem permissão! " });
+    return res.status(403).json({ message: "sem permissão! " });
   }
 
   try {
