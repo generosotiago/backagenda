@@ -24,11 +24,11 @@ mongoose.connect(uri, {
 app.use(bodyParser.json());
 app.use(cors());
 
-app.use('/bookings', require('./Booking/bookingRoute'));
-app.use("/api/auth", require("./Auth/Route"));
-app.use('/rooms', require('./Rooms/roomRoute'))
-app.use('/users', require('./users/userRoutes'));
-app.use('/stats', require('./stats/statsRoute'));
+app.use('/bookings', require('./routes/bookingRoute'));
+app.use("/api/auth", require("./routes/authRoute"));
+app.use('/rooms', require('./routes/roomRoute'))
+app.use('/users', require('./routes/userRoutes'));
+app.use('/stats', require('./routes/statsRoute'));
 
 const User = require("./models/user");
 
